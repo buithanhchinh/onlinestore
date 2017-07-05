@@ -25,10 +25,28 @@ export class AuthenService {
       }
     });
   }
-  logout() {
 
+  logout() {
+    localStorage.removeItem(SystemConstants.CURRENT_USER);
   }
+
   isAuthenticated(): boolean {
-    return true;
+    let user = localStorage.getItem(SystemConstants.CURRENT_USER);
+    if (user != null) {
+      return true;
+    }
+    else
+      return false;
+  }
+
+  getLoggedInUser(): LoggedInUser {
+    let user: LoggedInUser;
+    if (this.isAuthenticated()) {
+      var userData = JSON.parse(localStorage.getItem(SystemConstants.CURRENT_USER));
+      user = new LoggedInUser(userData.access_token, userData.username, userData.fullName, userData.email, userData.avatar);
+    }
+    else
+      user = null;
+    return user;
   }
 }
