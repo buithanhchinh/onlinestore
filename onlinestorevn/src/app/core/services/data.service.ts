@@ -1,11 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { Http, Headers, Response } from '@angular/http';
-import { Router } from "@angular/router";
-import { AuthenService } from './authen.service';
-import { SystemConstants } from '../../common/system.constants';
-import 'rxjs/add/operator/map';
-import { UtilityService } from './utility.service';
+import { Injectable } from '@angular/core';
 import { NotificationService } from './notification.service';
+import { AuthenService } from './authen.service';
+import { UtilityService } from './utility.service';
+import { SystemConstants } from '../../common/system.constants';
 import { MessageConstants } from '../../common/message.constants';
 import { Observable } from 'rxjs/Observable';
 
@@ -13,64 +12,59 @@ import { Observable } from 'rxjs/Observable';
 export class DataService {
 
   private headers: Headers;
-
-  constructor(private _http: Http,
-    private _router: Router,
-    private _authenService: AuthenService,
-    private _utilityService: UtilityService,
-    private _notificationService: NotificationService)
-  { }
+  constructor(private _http: Http, private _router: Router, private _authenService: AuthenService,
+    private _notificationService: NotificationService, private _utilityService: UtilityService) { }
 
   get(uri: string) {
-    let self = this;
-    self.headers.delete("Authorization");
-    self.headers.append("Authorization", "Bearer " + self._authenService.getLoggedInUser().access_token);
-    return self._http.get(SystemConstants.BASE_API + uri, { headers: self.headers }).map(self.extractData);
+    this.headers.delete("Authorization");
+    this.headers.append("Authorization", "Bearer " + this._authenService.getLoggedInUser().access_token);
+    return this._http.get(SystemConstants.BASE_API + uri, { headers: this.headers }).map(this.extractData);
   }
 
   post(uri: string, data?: any) {
-    let self = this;
-    self.headers.delete("Authorization");
-    self.headers.append("Authorization", "Bearer " + self._authenService.getLoggedInUser().access_token);
-    return self._http.post(SystemConstants.BASE_API + uri, data, { headers: self.headers }).map(self.extractData);
+    this.headers.delete("Authorization");
+    this.headers.append("Authorization", "Bearer " + this._authenService.getLoggedInUser().access_token);
+    return this._http.post(SystemConstants.BASE_API + uri, data, { headers: this.headers }).map(this.extractData);
   }
 
   put(uri: string, data?: any) {
-    let self = this;
-    self.headers.delete("Authorization");
-    self.headers.append("Authorization", "Bearer " + self._authenService.getLoggedInUser().access_token);
-    return self._http.put(SystemConstants.BASE_API + uri, data, { headers: self.headers }).map(self.extractData);
+    this.headers.delete("Authorization");
+    this.headers.append("Authorization", "Bearer " + this._authenService.getLoggedInUser().access_token);
+    return this._http.put(SystemConstants.BASE_API + uri, data, { headers: this.headers }).map(this.extractData);
   }
 
   delete(uri: string, key: string, id: string) {
-    let self = this;
-    self.headers.delete("Authorization");
-    self.headers.append("Authorization", "Bearer " + self._authenService.getLoggedInUser().access_token);
-    return self._http.delete(SystemConstants.BASE_API + uri + "/?" + key + "=" + id, { headers: self.headers }).map(self.extractData);
+    this.headers.delete("Authorization");
+    this.headers.append("Authorization", "Bearer " + this._authenService.getLoggedInUser().access_token);
+    return this._http.delete(SystemConstants.BASE_API + uri + "/?" + key + "=" + id, { headers: this.headers })
+      .map(this.extractData);
   }
+
   postFile(uri: string, data?: any) {
-    let self = this;
     let newHeader = new Headers();
-    newHeader.delete("Authorization");
-    newHeader.append("Authorization", "Bearer " + self._authenService.getLoggedInUser().access_token);
-    return self._http.post(SystemConstants.BASE_API + uri, data, { headers: newHeader }).map(self.extractData);
+    newHeader.append("Authorization", "Bearer " + this._authenService.getLoggedInUser().access_token);
+    return this._http.post(SystemConstants.BASE_API + uri, data, { headers: newHeader })
+      .map(this.extractData);
   }
-  public handleError(error: any) {
-    let self = this;
-    if (error.status == 401) {
-      localStorage.removeItem(SystemConstants.CURRENT_USER);
-      self._notificationService.printErrorMessage(MessageConstants.LOGIN_AGAIN_MSG);
-      self._utilityService.navigateToLogin();
-    }
-    else {
-      let errMsg = (error.message) ? error.message :
-        error.status ? `${error.status} - ${error.statusText}` : 'System error';
-      self._notificationService.printErrorMessage(errMsg);
-      return Observable.throw(errMsg);
-    }
-  }
+
   private extractData(res: Response) {
     let body = res.json();
     return body || {};
+  }
+  
+  public handleError(error: any) {
+    if (error.status == 401) {
+      localStorage.removeItem(SystemConstants.CURRENT_USER);
+      this._notificationService.printErrorMessage(MessageConstants.LOGIN_AGAIN_MSG);
+      this._utilityService.navigateToLogin();
+    }
+    else {
+      let errMsg = (error.message) ? error.message :
+        error.status ? `${error.status} - ${error.statusText}` : 'Lỗi hệ thống';
+      this._notificationService.printErrorMessage(errMsg);
+
+      return Observable.throw(errMsg);
+    }
+
   }
 }
